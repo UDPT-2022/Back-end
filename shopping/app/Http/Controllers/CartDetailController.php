@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\cart_detail;
 use App\Models\product;
+use App\Models\order;
 use Error;
 
 class CartDetailController extends Controller
@@ -31,9 +32,19 @@ class CartDetailController extends Controller
         $product = product::find($request->MA_SP);
         if (empty($product) || $product == null)
             throw new Error('Sản phẩm không tồn tại');
+
+        $product = product::find($request->MA_SP);
+        if ($product->SL_CON_LAI - $request->SO_LUONG < 0)
+            throw new Error('Không đủ hàng hóa');
+
+        $updateProduct = [
+            'SL_CON_LAI' => $product->SL_CON_LAI - $request->SO_LUONG
+        ];
+        $product->update($updateProduct);
+
         $DON_GIA = $product->GIA_SP;
         $GIA = $DON_GIA * $request->SO_LUONG;
-        
+
         $term = [
             'MA_GIO_HANG' => $request->MA_GIO_HANG,
             'MA_SP' => $request->MA_SP,
@@ -42,8 +53,7 @@ class CartDetailController extends Controller
             'GIA' => $GIA
         ];
 
-        return cart_detail::create( $term );
-
+        return cart_detail::create($term);
     }
 
     /**
@@ -69,13 +79,51 @@ class CartDetailController extends Controller
     {
         //
         $detail = cart_detail::find($id);
+        // Đơn hàng đã đặt
+        if (!empty($detail->MA_DON_HANG) && $detail->MA_DON_HANG !=null)
+            throw new Error('Đơn hàng đã tồn tại');
 
-        $DON_GIA = $detail->DON_GIA;
-        $GIA = $DON_GIA * $request->SO_LUONG;
-        $term = [
-            'SO_LUONG' => $request->SO_LUONG,
-            'GIA' => $GIA
+        $term = [];
+        if (!empty($request->DAT_HANG) && $request->DAT_HANG!=null) {
+            switch ($request->DAT_HANG) {
+                case 0:
+                    $term['DAT_HANG'] = false;
+                    break;
+                case 1:
+                    $term['DAT_HANG'] = true;
+                    break;
+                default:
+                    throw new Error('Lỗi tham số nhập');
+            }
+        }
+        if (!empty($request->MA_DON_HANG) && $request->MA_DON_HANG !=null) {
+            $order = order::find($request->MA_DON_HANG);
+            if (empty($order) || $order == null)
+                throw new Error('Hóa đơn không tồn tại');
+            if ($detail->DAT_HANG == 0)
+                throw new Error('Hàng không đặt');
+            $term['MA_DON_HANG'] = $request->MA_DON_HANG;
+        }
+        $product = product::find($detail->MA_SP);
+        if ($product->SL_CON_LAI + $detail->SO_LUONG - $request->SO_LUONG < 0)
+            throw new Error('Không đủ hàng hóa');
+
+        $updateProduct = [
+            'SL_CON_LAI' => $product->SL_CON_LAI + $detail->SO_LUONG - $request->SO_LUONG
         ];
+        $product->update($updateProduct);
+
+        $term['DON_GIA'] = $detail->DON_GIA;
+        $term['GIA'] = $detail->DON_GIA * $request->SO_LUONG;
+        $term['SO_LUONG'] = $request->SO_LUONG;
+        // $DON_GIA = $detail->DON_GIA;
+        // $GIA = $DON_GIA * $request->SO_LUONG;
+        // $term = [
+        //     'SO_LUONG' => $request->SO_LUONG,
+        //     'GIA' => $GIA,
+        //     'MA_DON_HANG'=> $request->MA_DON_HANG
+        // ];
+
         $detail->update($term);
         return $detail;
     }
@@ -88,11 +136,22 @@ class CartDetailController extends Controller
      */
     public function destroy($id)
     {
-        //
+        // Đơn hàng đã đặt
+        $detail = cart_detail::find($id);
+        
+        if (!empty($detail->MA_DON_HANG) && $detail->MA_DON_HANG !=null)
+            throw new Error('Đơn hàng đã tồn tại');
+
+        $product = product::find($detail->MA_SP);
+        $updateProduct = [
+            'SL_CON_LAI' => $product->SL_CON_LAI + $detail->SO_LUONG
+        ];
+        $product->update($updateProduct);
+
         return cart_detail::destroy($id);
     }
 
-        /**
+    /**
      * Search the specified resource from storage.
      *
      * @param  \Illuminate\Http\Request  $request

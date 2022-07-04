@@ -27,7 +27,8 @@ return new class extends Migration
             $table->integer('SO_LUONG');
             $table->decimal('DON_GIA',15,2);
             $table->decimal('GIA',30,2);
-        
+            $table->boolean('DAT_HANG')->default(false);
+
             $table->unique(['MA_GIO_HANG', 'MA_SP']);
             $table->timestamps();
         });

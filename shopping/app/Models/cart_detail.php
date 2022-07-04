@@ -14,6 +14,7 @@ class cart_detail extends Model
         'MA_DON_HANG',
         'SO_LUONG',
         'DON_GIA',
-        'GIA'
+        'GIA',
+        'DAT_HANG',
     ];
 }
