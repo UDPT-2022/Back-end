@@ -13,20 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('contracts');
-        Schema::dropIfExists('profiles');
-        Schema::create('profiles', function (Blueprint $table) {
-            // $table->foreignId('MA_NGUOI_DUNG')->constrained('users')->unique();
+        Schema::dropIfExists('stores');
+        Schema::create('stores', function (Blueprint $table) {
             $table->bigInteger('id')->unsigned()->unique()->primary();
-            $table->string('TEN')->nullable();
-            $table->string('CMND')->nullable();
+            $table->string('TEN_CUA_HANG')->nullable();
             $table->string('SDT')->nullable();
-            $table->date('NGAY_SINH')->nullable();
+            $table->string('EMAIL')->nullable();
             $table->longText('DIA_CHI')->nullable();
-            
-            
-            // $table->string('VAI_TRO');
-
+            $table->longText('LOGO')->nullable();
             $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
@@ -39,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('profiles');
+        Schema::dropIfExists('stores');
     }
 };

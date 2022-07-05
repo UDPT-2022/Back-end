@@ -21,38 +21,45 @@ class UserController extends Controller
             'email' => 'required|string|unique:users,email',
             'password' => 'required|string|confirmed',
             'role' => 'required|string|in:ADMIN,SELLER,SHIPPER,BUYER',
-            // Profile
-            'TEN' => 'required|string',
-            'CMND' => 'required|string|regex:/^[0-9]+$/',
-            'SDT' => 'required|string|regex:/^[0-9]+$/',
-            'NGAY_SINH' => 'required|date|before_or_equal:now',
-            'DIA_CHI' => 'required|string',
+            // // Profile
+            // 'TEN' => 'string',
+            // 'CMND' => 'string|regex:/^[0-9]+$/',
+            // 'SDT' => 'string|regex:/^[0-9]+$/',
+            // 'NGAY_SINH' => 'date|before_or_equal:now',
+            // 'DIA_CHI' => 'string',
         ]);
-        $user = null;
-        $profile = null;
-        try {
-            $user = User::create([
-                'name' => $fields['name'],
-                'email' => $fields['email'],
-                'password' => bcrypt($fields['password']),
-                'role' => $fields['role']
-            ]);
-            $profile = profile::create([
-                'TEN' => $fields['TEN'],
-                'CMND' => $fields['CMND'],
-                'SDT' => $fields['SDT'],
-                'NGAY_SINH' => date("Y-m-d", strtotime($fields['NGAY_SINH'])),
-                'DIA_CHI' => $fields['DIA_CHI'],
-                'id' => $user->id,
-                'VAI_TRO' => $user->role
-            ]);
-        } catch (\Exception $er) {
-            if ($user != null && !empty($user))
-                $user->delete();
-            if ($profile != null && !empty($profile))
-                $profile->delete();
-            throw $er;
-        }
+        // $user = null;
+        // $profile = null;
+        $user = User::create([
+            'name' => $fields['name'],
+            'email' => $fields['email'],
+            'password' => bcrypt($fields['password']),
+            'role' => $fields['role']
+        ]);
+
+        // try {
+        //     $user = User::create([
+        //         'name' => $fields['name'],
+        //         'email' => $fields['email'],
+        //         'password' => bcrypt($fields['password']),
+        //         'role' => $fields['role']
+        //     ]);
+        //     $profile = profile::create([
+        //         'TEN' => $fields['TEN'],
+        //         'CMND' => $fields['CMND'],
+        //         'SDT' => $fields['SDT'],
+        //         'NGAY_SINH' => date("Y-m-d", strtotime($fields['NGAY_SINH'])),
+        //         'DIA_CHI' => $fields['DIA_CHI'],
+        //         'id' => $user->id,
+        //         'VAI_TRO' => $user->role
+        //     ]);
+        // } catch (\Exception $er) {
+        //     if ($user != null && !empty($user))
+        //         $user->delete();
+        //     if ($profile != null && !empty($profile))
+        //         $profile->delete();
+        //     throw $er;
+        // }
 
 
 
@@ -60,7 +67,7 @@ class UserController extends Controller
 
         $response = [
             'user' => $user,
-            'profile' => $profile,
+            // 'profile' => $profile,
             'token' => $token
         ];
 
@@ -108,8 +115,75 @@ class UserController extends Controller
         $user = auth()->user();
         if (empty($user) ||  $user == null)
             return null;
-        $user['MA_NGUOI_DUNG'] = profile::where('id', '=', $user->id)->get()[0]['MA_NGUOI_DUNG'];
         return $user;
+    }
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        // current user
+        $user = auth()->user();
+        $rule = [
+            'TEN' => 'string|nullable',
+            'CMND' => 'string|regex:/^[0-9]+$/|nullable',
+            'SDT' => 'string|regex:/^[0-9]+$/|nullable',
+            'NGAY_SINH' => 'date|before_or_equal:now|nullable',
+            'DIA_CHI' => 'string|nullable',
+        ];
+
+        $id = null;
+        if (empty($user) ||  $user == null) {
+            $rule['id'] = 'required|numeric';
+        }
+
+        $fields = $request->validate($rule);
+
+        if (empty($user) && $user == null && $fields['id'] != null && !empty($fields['id'])) {
+            $id = $fields['id'];
+        } else {
+            $id = $user->id;
+        }
+        $new = ['id' => $id];
+        foreach ($fields as $field => $value) {
+            $new[$field] = $value;
+        }
+        // $new = [
+        //     'id' => $id,
+        //     'TEN' => $fields['TEN'],
+        //     'CMND' => $fields['CMND'],
+        //     'SDT' => $fields['SDT'],
+        //     'NGAY_SINH' => date("Y-m-d", strtotime($fields['NGAY_SINH'])),
+        //     'DIA_CHI' => $fields['DIA_CHI'],
+        // ];
+        $profile = profile::create($new);
+        return $profile->find($id);
+    }
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id = null)
+    {
+        //
+        $user = auth()->user();
+        if ((empty($user) || $user == null) && $id == null)
+            throw new Error('id trắng');
+
+        if (!empty($user) &&  $user != null) {
+            if ($user->role == 'ADMIN' && $id == null) {
+                return profile::all();
+            }
+            if ($user->role != 'ADMIN') {
+                $id = $user->id;
+            }
+        }
+        return profile::find($id);
     }
     /**
      * Search the specified resource from storage.
@@ -120,6 +194,11 @@ class UserController extends Controller
     public function search(Request $request)
     {
         //
+        $user = auth()->user();
+        if (!empty($user) &&  $user != null && $user->role == 'ADMIN') {
+            throw new Error('Không có quyền');
+        }
+
         $builder = profile::query();
         $term = $request->all();
         if (!empty($term['TEN'])) {
@@ -137,44 +216,9 @@ class UserController extends Controller
         if (!empty($term['DIA_CHI'])) {
             $builder->where('DIA_CHI', 'like', '%' . $term['DIA_CHI'] . '%');
         }
-        if (!empty($term['VAI_TRO'])) {
-            $builder->where('VAI_TRO', 'like', '%' . $term['VAI_TRO'] . '%');
-        }
         return $builder->get();
     }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        $user = auth()->user();
-        return profile::where('id', '=', $user->id)->get()[0];
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -187,15 +231,18 @@ class UserController extends Controller
     {
         //
         $user = auth()->user();
-        if ($id == null)
+        if (!empty($user) &&  $user != null) {
             $id = $user->id;
+        }
+        if ($id == null)
+            throw new Error('id trắng');
 
         $fields = $request->validate([
-            'TEN' => 'string',
-            'CMND' => 'string|regex:/^[0-9]+$/',
-            'SDT' => 'string|regex:/^[0-9]+$/',
-            'NGAY_SINH' => 'date|before_or_equal:now',
-            'DIA_CHI' => 'string',
+            'TEN' => 'string|nullable',
+            'CMND' => 'string|regex:/^[0-9]+$/|nullable',
+            'SDT' => 'string|regex:/^[0-9]+$/|nullable',
+            'NGAY_SINH' => 'date|before_or_equal:now|nullable',
+            'DIA_CHI' => 'string|nullable',
         ]);
         $updated = [];
         if (!empty($fields['TEN'])) {
@@ -213,20 +260,12 @@ class UserController extends Controller
         if (!empty($fields['DIA_CHI'])) {
             $updated['DIA_CHI'] = $fields['DIA_CHI'];
         }
-        if (count($updated) <= 0)
-            throw new Error('Input rỗng');
-        profile::where('id', '=', $id)->limit(1)->update($updated);
-        return profile::where('id', '=', $id)->get();
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        $profile = profile::find($id);
+        if (empty($profile) || $profile == null)
+            throw new Error('profile không tồn tại');
+
+        $profile->update($updated);
+        return $profile;
     }
 }

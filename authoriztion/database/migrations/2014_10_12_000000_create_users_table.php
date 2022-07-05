@@ -13,6 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('stores');
+        Schema::dropIfExists('contracts');
         Schema::dropIfExists('profiles');
         Schema::dropIfExists('users');
         Schema::create('users', function (Blueprint $table) {

@@ -17,6 +17,7 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id('MA_SP');
             $table->string('TEN_SP');
+            $table->string('LOAI_SP');
             $table->bigInteger('MA_CUA_HANG');
             $table->decimal('GIA_SP',15,2);
             $table->integer('SL_CON_LAI')->default('0');

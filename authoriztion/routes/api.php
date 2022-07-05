@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\StoreController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,23 +15,63 @@ use App\Http\Controllers\ContractController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+// > account
+// >> V
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
-Route::post('/user/search', [UserController::class, 'search']);
+// >> X
+// .....
+
+// > account's profile
+// >> V
+// ......
+// >> X
+Route::post('/user/profile', [UserController::class, 'store']);
+Route::put('/user/profile/{id}', [UserController::class, 'update']);
+Route::get('/user/profile/{id}', [UserController::class, 'show']);
+Route::post('/user/profile/search', [UserController::class, 'search']);
+
+// > store
+// >> V
+Route::get('/store', [StoreController::class, 'index']);
+Route::get('/store/{id}', [StoreController::class, 'show']);
+Route::post('/store/search', [StoreController::class, 'search']);
+// >> X
+Route::post('/store', [StoreController::class, 'store']);
+Route::put('/store/{id}', [StoreController::class, 'update']);
+
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
+
+    // > account
+    // >> V
     Route::get('/current', [UserController::class, 'currentUser']);
     Route::post('/logout', [UserController::class, 'logout']);
+    // >> X
+    // ......
 
-    Route::get('/user/profile', [UserController::class, 'index']);
+    // > account's profile
+    // >> V
     Route::put('/user/profile', [UserController::class, 'update']);
+    // >> X
+    //Route::post('/user/profile', [UserController::class, 'store']);
+    //Route::get('/user/profile/{id}', [UserController::class, 'show']);
+    //Route::post('/user/profile/search', [UserController::class, 'search']);
 
-    Route::get('/contract', [ContractController::class, 'index']);
-    Route::post('/contract', [ContractController::class, 'store']);
-    Route::put('/contract', [ContractController::class, 'update']);
-    Route::delete('/contract', [ContractController::class, 'destroy']);
-    Route::post('/contract/search', [ContractController::class, 'search']);
-    Route::get('/contract/{id}', [ContractController::class, 'show']);
+    // > store
+    // >> V
+    Route::put('/store', [StoreController::class, 'update']);
+    // >> X
+    //Route::post('/store', [StoreController::class, 'store']);
+    //Route::put('/store/{id}', [StoreController::class, 'update']);
+
+    // Route::get('/contract', [ContractController::class, 'index']);
+    // Route::post('/contract', [ContractController::class, 'store']);
+    // Route::put('/contract', [ContractController::class, 'update']);
+    // Route::delete('/contract', [ContractController::class, 'destroy']);
+    // Route::post('/contract/search', [ContractController::class, 'search']);
+    // Route::get('/contract/{id}', [ContractController::class, 'show']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
