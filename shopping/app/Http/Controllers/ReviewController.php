@@ -146,4 +146,23 @@ class ReviewController extends Controller
             throw new Error('Không có quyền');
         return Review::destroy($id);
     }
+    /**
+     * Search the specified resource from storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function search(Request $request)
+    {
+        //
+        $builder = Review::query();
+        $term = $request->all();
+        if (!empty($term['MA_SP'])) {
+            $builder->where('MA_SP', '=', $term['MA_SP']);
+        }
+        if (!empty($term['MA_NGUOI_DUNG'])) {
+            $builder->where('MA_NGUOI_DUNG', '=', $term['MA_NGUOI_DUNG']);
+        }
+        return $builder->get();
+    }
 }
