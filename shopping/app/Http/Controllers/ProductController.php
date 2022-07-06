@@ -31,7 +31,7 @@ class ProductController extends Controller
         $CurUser = null;
         if (!empty($request->header()['authorization']) && $request->header()['authorization'] != null) {
             $CurUser = Http::withHeaders([
-                'accept' => 'application/json',
+                'accept' => 'application/json', 
                 'Authorization' => $request->header()['authorization']
             ])->get('http://localhost:8002/api/current')->json();
             if (array_key_exists('message', $CurUser))

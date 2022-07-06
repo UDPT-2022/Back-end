@@ -18,7 +18,7 @@ return new class extends Migration
         Schema::create('carts', function (Blueprint $table) {
             $table->id('MA_GIO_HANG');
             $table->bigInteger('MA_NGUOI_DUNG');
-            $table->int('TONG_TIEN')->default('0');
+            $table->integer('TONG_TIEN')->default('0');
             $table->timestamps();
         });
     }

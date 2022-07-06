@@ -46,7 +46,6 @@ router.post(
       NGAY_SINH: req.body.NGAY_SINH,
       DIA_CHI: req.body.DIA_CHI,
     };
-
     const result = await axios
       .post(auth + "/register", body, options)
       .then((response) => {
