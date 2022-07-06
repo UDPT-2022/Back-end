@@ -67,7 +67,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //Route::post('/store', [StoreController::class, 'store']);
     //Route::put('/store/{id}', [StoreController::class, 'update']);
 
-    // Route::get('/contract', [ContractController::class, 'index']);
+    Route::get('/contract', [ContractController::class, 'index']);
     // Route::post('/contract', [ContractController::class, 'store']);
     // Route::put('/contract', [ContractController::class, 'update']);
     // Route::delete('/contract', [ContractController::class, 'destroy']);

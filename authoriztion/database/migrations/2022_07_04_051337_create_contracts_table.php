@@ -24,8 +24,8 @@ return new class extends Migration
             $table->longText('GIAY_CHUNG_NHAN_AN_TOAN')->nullable();
             $table->longText('GIAY_PHEP_KINH_DOANH')->nullable();
             
-            // $table->bigInteger('MA_NGUOI_DUNG')->unsigned();
-            // $table->foreign('MA_NGUOI_DUNG')->references('MA_NGUOI_DUNG')->on('profiles')->onDelete('cascade');
+            $table->bigInteger('id')->unsigned();
+            $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
             
             $table->timestamps();
 

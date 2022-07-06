@@ -19,13 +19,10 @@ class ContractController extends Controller
     {
         //
         $user = auth()->user();
-
-
         if ($user->role == 'ADMIN') {
             return contract::orderBy('created_at', 'desc')->orderBy('updated_at', 'desc')->get();
         }
-        $profile = profile::where('id', '=', $user->id)->limit(1)->get()[0];
-        return  contract::where('MA_NGUOI_DUNG', '=', $profile['MA_NGUOI_DUNG'])->orderBy('created_at', 'desc')->orderBy('updated_at', 'desc')->get();
+        return  contract::where('id', '=',$user->id)->orderBy('created_at', 'desc')->orderBy('updated_at', 'desc')->get();
     }
 
     /**
