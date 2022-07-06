@@ -13,11 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('cart_details');
         Schema::dropIfExists('carts');
         Schema::create('carts', function (Blueprint $table) {
             $table->id('MA_GIO_HANG');
             $table->bigInteger('MA_NGUOI_DUNG');
-            $table->decimal('TONG_TIEN',30,2)->default('0');
+            $table->int('TONG_TIEN')->default('0');
             $table->timestamps();
         });
     }

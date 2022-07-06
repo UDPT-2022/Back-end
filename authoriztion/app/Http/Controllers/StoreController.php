@@ -46,7 +46,7 @@ class StoreController extends Controller
         }
 
         $fields = $request->validate($rule);
-        if (empty($user) && $user == null && $fields['id'] != null && !empty($fields['id'])) {
+        if (empty($user) && $user == null && !empty($fields['id']) && $fields['id'] != null) {
             $id = $fields['id'];
         } else {
             $id = $user->id;

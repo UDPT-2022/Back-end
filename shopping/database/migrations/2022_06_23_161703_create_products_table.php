@@ -13,16 +13,19 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('reviews');
+        Schema::dropIfExists('cart_details');
+        Schema::dropIfExists('carts');
         Schema::dropIfExists('products');
         Schema::create('products', function (Blueprint $table) {
             $table->id('MA_SP');
             $table->string('TEN_SP');
             $table->string('LOAI_SP');
             $table->bigInteger('MA_CUA_HANG');
-            $table->decimal('GIA_SP',15,2);
+            $table->integer('GIA_SP');
             $table->integer('SL_CON_LAI')->default('0');
             $table->longText('MO_TA')->nullable();
-            $table->longText('DANH_GIA')->nullable();
+            //$table->longText('DANH_GIA')->nullable();
             $table->longText('ANH')->nullable();
             $table->timestamps();
 

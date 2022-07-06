@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CartDetailController;
+use App\Http\Controllers\ReviewController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -25,6 +26,14 @@ Route::get('/products/{product}',[ProductController::class,'show']);
 Route::put('/products/{product}',[ProductController::class,'update']);
 Route::delete('/products/{product}',[ProductController::class,'destroy']);
 Route::post('/products/search',[ProductController::class,'search']);
+Route::get('/products/info/types',[ProductController::class,'productType']);
+
+// review
+Route::get('/reviews/{review}',[ReviewController::class,'show']);
+Route::post('/reviews',[ReviewController::class,'store']);
+Route::put('/reviews/{review}',[ReviewController::class,'update']);
+Route::delete('/reviews/{review}',[ReviewController::class,'destroy']);
+Route::post('/reviews/search',[ReviewController::class,'search']);
 
 // cart
 Route::post('/carts',[CartController::class,'store']);

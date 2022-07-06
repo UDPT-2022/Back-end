@@ -12,11 +12,12 @@ class product extends Model
     protected $primaryKey = 'MA_SP';
     protected $fillable = [
         'TEN_SP',
+        'LOAI_SP',
         'MA_CUA_HANG',
         'GIA_SP',
         'SL_CON_LAI',
         'MO_TA',
-        'DANH_GIA',
+        // 'DANH_GIA',
         'ANH'
     ];
 }

@@ -117,6 +117,14 @@ class UserController extends Controller
             return null;
         return $user;
     }
+    public function UserExist($id)
+    {
+        $user = User::find($id);
+        if ($user !=null){
+            return response(['name'=>$user->name,'role'=>$user->role], 201);
+        }
+        return null;
+    }
     /**
      * Store a newly created resource in storage.
      *

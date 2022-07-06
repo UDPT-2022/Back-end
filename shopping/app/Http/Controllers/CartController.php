@@ -26,7 +26,7 @@ class CartController extends Controller
     {
         //
         $request->validate([
-            'MA_NGUOI_DUNG' => 'required'
+            'MA_NGUOI_DUNG' => 'required|numberic'
         ]);
         return cart::create($request->all());
     }

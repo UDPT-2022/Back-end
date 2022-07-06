@@ -20,6 +20,7 @@ use App\Http\Controllers\StoreController;
 // >> V
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
+Route::get('/existuser/{id}', [UserController::class, 'UserExist']);
 // >> X
 // .....
 
