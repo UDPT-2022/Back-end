@@ -5,8 +5,9 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CartDetailController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderDetailController;
 use App\Http\Controllers\ReviewController;
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +57,13 @@ Route::get('/orders/{order}',[OrderController::class,'show']);
 Route::put('/orders/{order}',[OrderController::class,'update']);
 Route::delete('/orders/{order}',[OrderController::class,'destroy']);
 Route::post('/orders/search',[OrderController::class,'search']);
+
+// order/order details
+Route::post('/orders/detail',[OrderDetailController::class,'store']);
+Route::get('/orders/detail/{id}',[OrderDetailController::class,'show']);
+Route::put('/orders/detail/{id}',[OrderDetailController::class,'update']);
+Route::delete('/orders/detail/{id}',[OrderDetailController::class,'destroy']);
+Route::post('/orders/detail/search',[OrderDetailController::class,'search']);
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

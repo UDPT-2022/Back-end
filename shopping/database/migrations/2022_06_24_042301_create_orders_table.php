@@ -13,6 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('order_details');
         Schema::dropIfExists('orders');
         Schema::create('orders', function (Blueprint $table) {
             $table->id('MA_DON_HANG');

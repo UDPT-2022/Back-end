@@ -56,7 +56,7 @@ class OrderController extends Controller
         if ($CurUser != null) {
             $fields['MA_NGUOI_DUNG'] = $CurUser['id'];
         }
-        $fields['TRANG_THAI'] = 'chuẩn bị';
+        $fields['TRANG_THAI'] = 'đặt';
 
         $store = Http::withHeaders([
             'accept' => 'application/json',
@@ -124,6 +124,8 @@ class OrderController extends Controller
         //     throw new Error('thiếu token');
 
         $order = order::find($id);
+        if ( $order['TRANG_THAI'] == 'đặt')
+            $order->update(['TRANG_THAI'=>'chuẩn bị']);
         if ($CurUser != null) {
             if ($CurUser['id'] != $order['MA_NGUOI_DUNG'] && $CurUser['id'] != $order['MA_CUA_HANG']) {
                 if ($CurUser['role'] != 'ADMIN' && $CurUser['role'] != 'SHIPPER')
