@@ -20,7 +20,8 @@ return new class extends Migration
             $table->bigInteger('MA_CUA_HANG');
             $table->longText('MA_SHIPPER')->nullable();
             $table->longText('DIA_CHI');
-            $table->decimal('TONG_TIEN',30,2)->default('0');
+            $table->string('SDT');
+            $table->integer('TONG_TIEN')->default('0');
             $table->string('TRANG_THAI')->nullable();
             
             $table->timestamps();

@@ -120,8 +120,8 @@ class UserController extends Controller
     public function UserExist($id)
     {
         $user = User::find($id);
-        if ($user !=null){
-            return response(['name'=>$user->name,'role'=>$user->role], 201);
+        if ($user != null) {
+            return response(['name' => $user->name, 'role' => $user->role], 201);
         }
         return null;
     }
@@ -157,6 +157,8 @@ class UserController extends Controller
         }
         $new = ['id' => $id];
         foreach ($fields as $field => $value) {
+            if ($field == 'NGAY_SINH')
+                $new[$field] = date("Y-m-d", strtotime($fields[$field]));
             $new[$field] = $value;
         }
         // $new = [
@@ -263,7 +265,7 @@ class UserController extends Controller
             $updated['SDT'] = $fields['SDT'];
         }
         if (!empty($fields['NGAY_SINH'])) {
-            $updated['NGAY_SINH'] = $fields['NGAY_SINH'];
+            $updated['NGAY_SINH'] = date("Y-m-d", strtotime($fields['NGAY_SINH']));
         }
         if (!empty($fields['DIA_CHI'])) {
             $updated['DIA_CHI'] = $fields['DIA_CHI'];

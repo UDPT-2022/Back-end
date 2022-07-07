@@ -41,12 +41,6 @@ Route::get('/carts/{cart}',[CartController::class,'show']);
 Route::delete('/carts/{product}',[CartController::class,'destroy']);
 Route::post('/carts/search',[CartController::class,'search']);
 
-// order
-Route::post('/orders',[OrderController::class,'store']);
-Route::get('/orders/{order}',[OrderController::class,'show']);
-Route::put('/orders/{order}',[OrderController::class,'update']);
-Route::delete('/orders/{order}',[OrderController::class,'destroy']);
-Route::post('/orders/search',[OrderController::class,'search']);
 
 // cart/order details
 
@@ -55,6 +49,13 @@ Route::get('/carts/detail/{id}',[CartDetailController::class,'show']);
 Route::put('/carts/detail/{id}',[CartDetailController::class,'update']);
 Route::delete('/carts/detail/{id}',[CartDetailController::class,'destroy']);
 Route::post('/carts/detail/search',[CartDetailController::class,'search']);
+
+// order
+Route::post('/orders',[OrderController::class,'store']);
+Route::get('/orders/{order}',[OrderController::class,'show']);
+Route::put('/orders/{order}',[OrderController::class,'update']);
+Route::delete('/orders/{order}',[OrderController::class,'destroy']);
+Route::post('/orders/search',[OrderController::class,'search']);
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

@@ -22,7 +22,7 @@ class ContractController extends Controller
         if ($user->role == 'ADMIN') {
             return contract::orderBy('created_at', 'desc')->orderBy('updated_at', 'desc')->get();
         }
-        return  contract::where('id', '=',$user->id)->orderBy('created_at', 'desc')->orderBy('updated_at', 'desc')->get();
+        return  contract::where('id', '=', $user->id)->orderBy('created_at', 'desc')->orderBy('updated_at', 'desc')->get();
     }
 
     /**
@@ -35,67 +35,60 @@ class ContractController extends Controller
     {
         // current user
         $user = auth()->user();
-
         // rules
-        $rules = [
-            'NGAY_KY' => 'date',
-            'NGAY_HIEU_LUC' => 'date',
-            'NGAY_KET_THUC' => 'date|after_or_equal:now',
-            'GIAY_CHUNG_NHAN_AN_TOAN' => 'string',
-            'GIAY_PHEP_KINH_DOANH' => 'string',
-        ];
-        switch ($user->role) {
-            case 'ADMIN':
-                $rules['MA_NGUOI_DUNG'] = 'required|string';
-                break;
-            case 'BUYER':
-                throw new Error('Người dùng không có quyền');
-                break;
-            default:
-                break;
+        $rules = ['NGAY_KY' => 'date|after_or_equal:now'];
+        if (empty($user) || $user == null) {
+            $rules['id'] = 'required|numeric';
+        } else {
+            switch ($user->role) {
+                case 'ADMIN':
+                    $rules['id'] = 'required|numeric';
+                    // $rules['NGAY_KY'] = 'date';
+                    $rules['NGAY_HIEU_LUC'] = 'date|after_or_equal:NGAY_KY';
+                    $rules['NGAY_KET_THUC'] = 'date|after:NGAY_HIEU_LUC';
+                    $rules['GIAY_CHUNG_NHAN_AN_TOAN'] = 'string';
+                    $rules['GIAY_PHEP_KINH_DOANH'] = 'string';
+                    break;
+                case 'SELLER':
+                    $rules['GIAY_CHUNG_NHAN_AN_TOAN'] = 'string';
+                    $rules['GIAY_PHEP_KINH_DOANH'] = 'string';
+                    break;
+                case 'BUYER':
+                    throw new Error('Người dùng không có quyền');
+                    break;
+                default:
+                    break;
+            }
         }
-        // Get fields
 
+        // Get fields
         $fields = $request->validate($rules);
         $exists = null;
         $contract = null;
 
-
-        if ($user->role == 'ADMIN') {
-            $exists = profile::where('MA_NGUOI_DUNG', '=', $fields['MA_NGUOI_DUNG'])->limit(1)->get();
-            if (empty($exists) || $exists == null || count($exists) <= 0)
-                throw new Error('Người dùng không tồn tại');
-            $exists = $exists[0];
-            if (!empty($fields['NGAY_KY']) && $fields['NGAY_KY'] != null)
-                $contract['NGAY_KY'] = $fields['NGAY_KY'];
-            if (!empty($fields['NGAY_HIEU_LUC']) && $fields['NGAY_HIEU_LUC'] != null)
-                $contract['NGAY_HIEU_LUC'] = $fields['NGAY_HIEU_LUC'];
-            if (!empty($fields['NGAY_KET_THUC']) && $fields['NGAY_KET_THUC'] != null)
-                $contract['NGAY_KET_THUC'] = $fields['NGAY_KET_THUC'];
+        if (empty($user) || $user == null || $user->role == 'ADMIN') {
+            $exists = User::find($fields['id']);
+            if (empty($exists) || $exists == null) {
+                return new Error('User không tồn tại');
+            } else {
+                if ($exists->role == 'ADMIN' || $exists->role == 'BUYER') {
+                    throw new Error('không thể tạo contract cho user nhập');
+                }
+            }
         } else {
-            $exists = profile::where('id', '=', $user->id)->limit(1)->get()[0];
+            $exists = $user;
         }
+        $fields['LOAI'] = $exists['role'];
+        $fields['id'] = $exists['id'];
+        if (!empty($fields['NGAY_KY']) && $fields['NGAY_KY'] != null)
+            $fields['NGAY_KY'] =  date("Y-m-d", strtotime($fields['NGAY_KY']));
+        if (!empty($fields['NGAY_HIEU_LUC']) && $fields['NGAY_HIEU_LUC'] != null)
+            $fields['NGAY_HIEU_LUC'] =  date("Y-m-d", strtotime($fields['NGAY_HIEU_LUC']));
+        if (!empty($fields['NGAY_KET_THUC']) && $fields['NGAY_KET_THUC'] != null)
+            $fields['NGAY_KET_THUC'] =  date("Y-m-d", strtotime($fields['NGAY_KET_THUC']));
 
-        $contract['LOAI'] = $exists['VAI_TRO'];
-        $contract['MA_NGUOI_DUNG'] = $exists['MA_NGUOI_DUNG'];
 
-
-
-        switch ($contract['LOAI']) {
-            case 'SELLER':
-                if (!empty($fields['GIAY_CHUNG_NHAN_AN_TOAN']) && $fields['GIAY_CHUNG_NHAN_AN_TOAN'] != null)
-                    $contract['GIAY_CHUNG_NHAN_AN_TOAN'] = $fields['GIAY_CHUNG_NHAN_AN_TOAN'];
-                if (!empty($fields['GIAY_PHEP_KINH_DOANH']) && $fields['GIAY_PHEP_KINH_DOANH'] != null)
-                    $contract['GIAY_PHEP_KINH_DOANH'] = $fields['GIAY_PHEP_KINH_DOANH'];
-                break;
-            case 'SHIPPER':
-                break;
-            default:
-                throw new Error('Loại hợp đồng chưa xác nhận');
-                break;
-        }
-
-        $contract = Contract::create($contract);
+        $contract = Contract::create($fields);
         return $contract;
     }
 
@@ -105,21 +98,17 @@ class ContractController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id = null)
     {
         //
         $user = auth()->user();
-        if ($user->role == 'ADMIN') {
+        if (empty($user) || $user == null || $user->role == 'ADMIN') {
             return contract::find($id);
         }
-
-        $profile = profile::where('id', '=', $user->id)->limit(1)->get()[0];
-        $find = contract::where('MA_NGUOI_DUNG', '=', $profile['MA_NGUOI_DUNG'])->where('MA_HOP_DONG', '=', $id)->limit(1)->get();
-        if (count($find) <= 0)
-            $find = null;
-        else
-            $find = $find[0];
-        return $find;
+        $contract = contract::find($id);
+        if ($contract['id'] != $user['id'])
+            return null;
+        return $contract;
     }
 
     /**
@@ -129,9 +118,53 @@ class ContractController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id = null)
+    public function update(Request $request, $id)
     {
         //
+        // current user
+        $user = auth()->user();
+        // rules
+        $rules = ['NGAY_KY' => 'date|after_or_equal:now'];
+        if (!empty($user) && $user != null) {
+            switch ($user->role) {
+                case 'ADMIN':
+                    // $rules['NGAY_KY'] = 'date';
+                    $rules['NGAY_HIEU_LUC'] = 'date|after_or_equal:NGAY_KY';
+                    $rules['NGAY_KET_THUC'] = 'date|after:NGAY_HIEU_LUC';
+                    $rules['GIAY_CHUNG_NHAN_AN_TOAN'] = 'string';
+                    $rules['GIAY_PHEP_KINH_DOANH'] = 'string';
+                    break;
+                case 'SELLER':
+                    $rules['GIAY_CHUNG_NHAN_AN_TOAN'] = 'string';
+                    $rules['GIAY_PHEP_KINH_DOANH'] = 'string';
+                    break;
+                case 'BUYER':
+                    throw new Error('Người dùng không có quyền');
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Get fields
+        $fields = $request->validate($rules);
+        if (!empty($fields['NGAY_KY']) && $fields['NGAY_KY'] != null)
+            $fields['NGAY_KY'] =  date("Y-m-d", strtotime($fields['NGAY_KY']));
+        if (!empty($fields['NGAY_HIEU_LUC']) && $fields['NGAY_HIEU_LUC'] != null)
+            $fields['NGAY_HIEU_LUC'] =  date("Y-m-d", strtotime($fields['NGAY_HIEU_LUC']));
+        if (!empty($fields['NGAY_KET_THUC']) && $fields['NGAY_KET_THUC'] != null)
+            $fields['NGAY_KET_THUC'] =  date("Y-m-d", strtotime($fields['NGAY_KET_THUC']));
+
+
+        $contract = Contract::find($id);
+        if (empty($contract) || $contract == null) {
+            throw new Error('contract không tồn tại');
+        }
+        if (!empty($user) && $user != null && $user['role'] != 'ADMIN' && $user['id'] != $contract['id']) {
+            throw new Error('không có quyền chỉnh sửa contract không phải của mình');
+        }
+        $contract->update($fields);
+        return $contract;
     }
 
     /**
@@ -143,6 +176,17 @@ class ContractController extends Controller
     public function destroy($id)
     {
         //
+        $user = auth()->user();
+
+        if (empty($user) || $user == null || $user->role == 'ADMIN') {
+            return Contract::destroy($id);;
+        }else {
+            throw new Error('không có quyền');
+        }
+        $contract = contract::find($id);
+        if ($contract['id'] != $user['id'])
+            throw new Error('không có quyền xóa contract không phải của mình');
+        return Contract::destroy($id);
     }
     /**
      * Search the specified resource from storage.
@@ -153,26 +197,29 @@ class ContractController extends Controller
     public function search(Request $request)
     {
         //
-        $builder = profile::query();
+        $user = auth()->user();
+        $builder = Contract::query();
         $term = $request->all();
-        // if (!empty($term['TEN'])) {
-        //     $builder->where('TEN', 'like', '%' . $term['TEN'] . '%');
-        // }
-        // if (!empty($term['CMND'])) {
-        //     $builder->where('CMND', 'like', '%' . $term['CMND'] . '%');
-        // }
-        // if (!empty($term['SDT'])) {
-        //     $builder->where('SDT', 'like', '%' . $term['SDT'] . '%');
-        // }
-        // if (!empty($term['NGAY_SINH'])) {
-        //     $builder->where('NGAY_SINH', '=', $term['NGAY_SINH']);
-        // }
-        // if (!empty($term['DIA_CHI'])) {
-        //     $builder->where('DIA_CHI', 'like', '%' . $term['DIA_CHI'] . '%');
-        // }
-        // if (!empty($term['VAI_TRO'])) {
-        //     $builder->where('VAI_TRO', 'like', '%' . $term['VAI_TRO'] . '%');
-        // }
+        if (!empty($term['LOAI'])) {
+            $builder->where('LOAI', 'like', $term['LOAI']);
+        }
+        if (!empty($term['NGAY_KY'])) {
+            $builder->where('NGAY_KY', '=', date("Y-m-d", strtotime($term['NGAY_KY'])));
+        }
+        if (!empty($term['NGAY_HIEU_LUC'])) {
+            $builder->where('NGAY_HIEU_LUC', '=', date("Y-m-d", strtotime($term['NGAY_HIEU_LUC'])));
+        }
+        if (!empty($term['NGAY_KET_THUC'])) {
+            $builder->where('NGAY_KET_THUC', '=', date("Y-m-d", strtotime($term['NGAY_KET_THUC'])));
+        }
+        if (empty($user) || $user == null || $user->role == 'ADMIN') {
+            if (!empty($term['id'])) {
+                $builder->where('id', '=', $term['id']);
+            }
+        }else {
+            $builder->where('id', '=', $user['id']);
+        }
+
         return $builder->get();
     }
 }

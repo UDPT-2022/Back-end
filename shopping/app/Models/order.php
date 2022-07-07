@@ -14,6 +14,10 @@ class order extends Model
         'MA_CUA_HANG',
         'MA_SHIPPER',
         'DIA_CHI',
-        'TRANG_THAI'
+        'TRANG_THAI',
+        'DIA_CHI',
+        'TONG_TIEN',
+        'TRANG_THAI',
+        'SDT',
     ];
 }

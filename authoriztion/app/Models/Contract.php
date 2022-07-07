@@ -16,6 +16,6 @@ class Contract extends Model
         'NGAY_KET_THUC',
         'GIAY_CHUNG_NHAN_AN_TOAN',
         'GIAY_PHEP_KINH_DOANH',
-        'MA_NGUOI_DUNG'
+        'id'
     ];
 }
