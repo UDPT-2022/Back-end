@@ -83,6 +83,10 @@ class OrderDetailController extends Controller
 
 
         $detail = order_detail::create($fields);
+
+        $sum = order_detail::where('MA_DON_HANG', '=', $order['MA_DON_HANG'])->sum('GIA');
+        $order->update(['TONG_TIEN' => $sum]);
+
         return $detail;
     }
 
@@ -140,6 +144,9 @@ class OrderDetailController extends Controller
             throw new Error('Không đủ hàng hóa');
         $product->update(['SL_CON_LAI' => $slct]);
 
+        $sum = order_detail::where('MA_DON_HANG', '=', $order['MA_DON_HANG'])->sum('GIA');
+        $order->update(['TONG_TIEN' => $sum]);
+
         $detail->update($fields);
         return $detail;
     }
@@ -158,7 +165,14 @@ class OrderDetailController extends Controller
         if ($order['TRANG_THAI'] != 'đặt' && $order['TRANG_THAI'] != 'chuẩn bị') {
             throw new Error('Order đã được xử lý');
         }
-        return order_detail::destroy($id);
+        $product = product::find($detail['MA_SP']);
+        $product->update(['SL_CON_LAI' => $product['SL_CON_LAI'] + $detail['SO_LUONG']]);
+
+        $result = order_detail::destroy($id);
+        $sum = order_detail::where('MA_DON_HANG', '=', $order['MA_DON_HANG'])->sum('GIA');
+        $order->update(['TONG_TIEN' => $sum]);
+
+        return $result;
     }
 
     /**
