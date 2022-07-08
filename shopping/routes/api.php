@@ -53,6 +53,7 @@ Route::post('/carts/detail/search',[CartDetailController::class,'search']);
 
 // order
 Route::post('/orders',[OrderController::class,'store']);
+Route::post('/orders/with/detail',[OrderController::class,'storeOrderWithProducts']);
 Route::get('/orders/{order}',[OrderController::class,'show']);
 Route::put('/orders/{order}',[OrderController::class,'update']);
 Route::delete('/orders/{order}',[OrderController::class,'destroy']);

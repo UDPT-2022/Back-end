@@ -20,8 +20,13 @@ return new class extends Migration
             $table->bigInteger('MA_NGUOI_DUNG');
             $table->bigInteger('MA_CUA_HANG');
             $table->longText('MA_SHIPPER')->nullable();
+
+            $table->string('HO_TEN');
             $table->longText('DIA_CHI');
+            $table->string('EMAIL')->nullable();;
             $table->string('SDT');
+            $table->longText('GHI_CHU')->nullable();
+
             $table->integer('TONG_TIEN')->default('0');
             $table->string('TRANG_THAI')->nullable();
             

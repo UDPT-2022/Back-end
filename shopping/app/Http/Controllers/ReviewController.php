@@ -51,14 +51,16 @@ class ReviewController extends Controller
             $rules['MA_NGUOI_DUNG'] = 'required|numeric';
         }
         $fields = $request->validate($rules);
-        if ($CurUser != null)
+        if ($CurUser != null) {
             $fields['MA_NGUOI_DUNG'] = $CurUser['id'];
-        else {
+            $fields['TEN'] =  $CurUser['name'];
+        } else {
             $user = Http::withHeaders([
                 'accept' => 'application/json',
             ])->get('http://localhost:8002/api/existuser/' . $fields['MA_NGUOI_DUNG'])->json();
             if (empty($user) || $user == null)
                 throw new Error('user không tồn tại');
+            $fields['TEN'] =  $user['name'];
         }
         $product = product::find($fields['MA_SP']);
         if ($product['MA_CUA_HANG'] == $fields['MA_NGUOI_DUNG'])

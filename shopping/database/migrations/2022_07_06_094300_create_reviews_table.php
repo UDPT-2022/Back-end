@@ -18,6 +18,7 @@ return new class extends Migration
             $table->id('MA_REVIEW');
             $table->bigInteger('MA_SP')->unsigned();
             $table->bigInteger('MA_NGUOI_DUNG')->unsigned();
+            $table->string('TEN');
             $table->longText('DANH_GIA')->nullable();
 
             $table->foreign('MA_SP')->references('MA_SP')->on('products')->onDelete('cascade');

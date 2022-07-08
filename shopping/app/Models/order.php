@@ -13,11 +13,15 @@ class order extends Model
         'MA_NGUOI_DUNG',
         'MA_CUA_HANG',
         'MA_SHIPPER',
+
+        'HO_TEN',
         'DIA_CHI',
-        'TRANG_THAI',
-        'DIA_CHI',
+        'EMAIL',
+        'SDT',
+        'GHI_CHU',
+        
         'TONG_TIEN',
         'TRANG_THAI',
-        'SDT',
+      
     ];
 }

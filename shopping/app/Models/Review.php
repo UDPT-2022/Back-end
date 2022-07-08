@@ -12,6 +12,7 @@ class Review extends Model
     protected $fillable = [
         'MA_SP',
         'MA_NGUOI_DUNG',
-        'DANH_GIA'
+        'DANH_GIA',
+        'TEN',
     ];
 }
