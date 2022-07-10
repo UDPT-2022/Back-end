@@ -78,7 +78,7 @@ router.post(
     if (error != null) res.status(200).json(error);
 
     let token = newAccount["token"].split("|")[1];
-    console.log(newAccount["token"]);
+    //console.log(newAccount["token"]);
     //console.log(newAccount['id']);
     //return res.status(200).json(newAccount);
 

@@ -23,7 +23,8 @@ return new class extends Migration
             $table->date('NGAY_KET_THUC')->nullable();
             $table->longText('GIAY_CHUNG_NHAN_AN_TOAN')->nullable();
             $table->longText('GIAY_PHEP_KINH_DOANH')->nullable();
-            
+            $table->boolean('HOP_DONG_DA_XET_DUYET')->default(0);
+
             $table->bigInteger('id')->unsigned();
             $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
             

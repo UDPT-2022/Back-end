@@ -43,6 +43,16 @@ Route::post('/store/search', [StoreController::class, 'search']);
 Route::post('/store', [StoreController::class, 'store']);
 Route::put('/store/{id}', [StoreController::class, 'update']);
 
+// > contract
+// >> V
+// ...
+// >> X
+Route::get('/contract', [ContractController::class, 'index']);
+Route::post('/contract', [ContractController::class, 'store']);
+Route::get('/contract/{contract}', [ContractController::class, 'show']);
+Route::put('/contract/{contract}', [ContractController::class, 'update']);
+Route::delete('/contract/{contract}', [ContractController::class, 'destroy']);
+Route::post('/contract/search', [ContractController::class, 'search']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
 
@@ -69,12 +79,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //Route::put('/store/{id}', [StoreController::class, 'update']);
 
     // > contract
-    Route::get('/contract', [ContractController::class, 'index']);
-    Route::post('/contract', [ContractController::class, 'store']);
-    Route::get('/contract/{contract}', [ContractController::class, 'show']);
-    Route::put('/contract/{contract}', [ContractController::class, 'update']);
-    Route::delete('/contract/{contract}', [ContractController::class, 'destroy']);
-    Route::post('/contract/search', [ContractController::class, 'search']);
+    // >> V
+    // ...
+    // >> X
+    // Route::get('/contract', [ContractController::class, 'index']);
+    // Route::post('/contract', [ContractController::class, 'store']);
+    // Route::get('/contract/{contract}', [ContractController::class, 'show']);
+    // Route::put('/contract/{contract}', [ContractController::class, 'update']);
+    // Route::delete('/contract/{contract}', [ContractController::class, 'destroy']);
+    // Route::post('/contract/search', [ContractController::class, 'search']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

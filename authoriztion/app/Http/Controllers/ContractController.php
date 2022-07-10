@@ -36,10 +36,19 @@ class ContractController extends Controller
         // current user
         $user = auth()->user();
         // rules
-        $rules = ['NGAY_KY' => 'date|after_or_equal:now'];
+        $rules = null;
         if (empty($user) || $user == null) {
-            $rules['id'] = 'required|numeric';
+            $rules = [
+                'NGAY_KY' => 'date|after_or_equal:now',
+                'id' => 'required|numeric',
+                'NGAY_HIEU_LUC' => 'date|after_or_equal:NGAY_KY',
+                'NGAY_KET_THUC' => 'date|after:NGAY_HIEU_LUC',
+                'GIAY_CHUNG_NHAN_AN_TOAN' => 'string',
+                'GIAY_PHEP_KINH_DOANH' => 'string',
+                'HOP_DONG_DA_XET_DUYET' => 'string',
+            ];
         } else {
+            $rules = ['NGAY_KY' => 'date|after_or_equal:now'];
             switch ($user->role) {
                 case 'ADMIN':
                     $rules['id'] = 'required|numeric';
@@ -48,6 +57,7 @@ class ContractController extends Controller
                     $rules['NGAY_KET_THUC'] = 'date|after:NGAY_HIEU_LUC';
                     $rules['GIAY_CHUNG_NHAN_AN_TOAN'] = 'string';
                     $rules['GIAY_PHEP_KINH_DOANH'] = 'string';
+                    $rules['HOP_DONG_DA_XET_DUYET'] = 'boolean';
                     break;
                 case 'SELLER':
                     $rules['GIAY_CHUNG_NHAN_AN_TOAN'] = 'string';
@@ -86,10 +96,16 @@ class ContractController extends Controller
             $fields['NGAY_HIEU_LUC'] =  date("Y-m-d", strtotime($fields['NGAY_HIEU_LUC']));
         if (!empty($fields['NGAY_KET_THUC']) && $fields['NGAY_KET_THUC'] != null)
             $fields['NGAY_KET_THUC'] =  date("Y-m-d", strtotime($fields['NGAY_KET_THUC']));
-
+        if (!empty($fields['HOP_DONG_DA_XET_DUYET']) && $fields['HOP_DONG_DA_XET_DUYET'] == true && empty($fields['NGAY_KY']) && empty($fields['NGAY_HIEU_LUC']) && empty($fields['NGAY_KET_THUC'])) {
+            //$fields['NGAY_KET_THUC'] =  date("Y-m-d", strtotime($fields['NGAY_KET_THUC']));
+            $start = date('Y-m-d');
+            $fields['NGAY_KY'] = $start;
+            $fields['NGAY_HIEU_LUC'] = date("Y-m-d", strtotime($start . "+ 7 days"));
+            $fields['NGAY_KET_THUC'] = date("Y-m-d", strtotime($fields['NGAY_HIEU_LUC'] . "+ 5 years"));
+        }
 
         $contract = Contract::create($fields);
-        return $contract;
+        return  Contract::find($contract['MA_HOP_DONG']);
     }
 
     /**
@@ -122,17 +138,32 @@ class ContractController extends Controller
     {
         //
         // current user
+        
         $user = auth()->user();
+        
         // rules
-        $rules = ['NGAY_KY' => 'date|after_or_equal:now'];
-        if (!empty($user) && $user != null) {
+        $rules = null;
+        if (empty($user) || $user == null) {
+            $rules = [
+                'NGAY_KY' => 'date|after_or_equal:now',
+                'id' => 'required|numeric',
+                'NGAY_HIEU_LUC' => 'date|after_or_equal:NGAY_KY',
+                'NGAY_KET_THUC' => 'date|after:NGAY_HIEU_LUC',
+                'GIAY_CHUNG_NHAN_AN_TOAN' => 'string',
+                'GIAY_PHEP_KINH_DOANH' => 'string',
+                'HOP_DONG_DA_XET_DUYET' => 'string',
+            ];
+        } else {
+            $rules = ['NGAY_KY' => 'date|after_or_equal:now'];
             switch ($user->role) {
                 case 'ADMIN':
+                    $rules['id'] = 'required|numeric';
                     // $rules['NGAY_KY'] = 'date';
                     $rules['NGAY_HIEU_LUC'] = 'date|after_or_equal:NGAY_KY';
                     $rules['NGAY_KET_THUC'] = 'date|after:NGAY_HIEU_LUC';
                     $rules['GIAY_CHUNG_NHAN_AN_TOAN'] = 'string';
                     $rules['GIAY_PHEP_KINH_DOANH'] = 'string';
+                    $rules['HOP_DONG_DA_XET_DUYET'] = 'boolean';
                     break;
                 case 'SELLER':
                     $rules['GIAY_CHUNG_NHAN_AN_TOAN'] = 'string';
@@ -145,7 +176,10 @@ class ContractController extends Controller
                     break;
             }
         }
-
+        $contract = Contract::find($id);
+        if (empty($contract) || $contract == null) {
+            throw new Error('contract không tồn tại');
+        }
         // Get fields
         $fields = $request->validate($rules);
         if (!empty($fields['NGAY_KY']) && $fields['NGAY_KY'] != null)
@@ -154,12 +188,15 @@ class ContractController extends Controller
             $fields['NGAY_HIEU_LUC'] =  date("Y-m-d", strtotime($fields['NGAY_HIEU_LUC']));
         if (!empty($fields['NGAY_KET_THUC']) && $fields['NGAY_KET_THUC'] != null)
             $fields['NGAY_KET_THUC'] =  date("Y-m-d", strtotime($fields['NGAY_KET_THUC']));
-
-
-        $contract = Contract::find($id);
-        if (empty($contract) || $contract == null) {
-            throw new Error('contract không tồn tại');
+        if (!empty($fields['HOP_DONG_DA_XET_DUYET']) && $fields['HOP_DONG_DA_XET_DUYET'] == true && empty($fields['NGAY_KY']) && empty($fields['NGAY_HIEU_LUC']) && empty($fields['NGAY_KET_THUC'])) {
+            //$fields['NGAY_KET_THUC'] =  date("Y-m-d", strtotime($fields['NGAY_KET_THUC']));
+            $start = date('Y-m-d');
+            $fields['NGAY_KY'] = $start;
+            $fields['NGAY_HIEU_LUC'] = date("Y-m-d", strtotime($start . "+ 7 days"));
+            $fields['NGAY_KET_THUC'] = date("Y-m-d", strtotime($fields['NGAY_HIEU_LUC'] . "+ 5 years"));
         }
+
+
         if (!empty($user) && $user != null && $user['role'] != 'ADMIN' && $user['id'] != $contract['id']) {
             throw new Error('không có quyền chỉnh sửa contract không phải của mình');
         }
@@ -180,7 +217,7 @@ class ContractController extends Controller
 
         if (empty($user) || $user == null || $user->role == 'ADMIN') {
             return Contract::destroy($id);;
-        }else {
+        } else {
             throw new Error('không có quyền');
         }
         $contract = contract::find($id);
@@ -216,7 +253,7 @@ class ContractController extends Controller
             if (!empty($term['id'])) {
                 $builder->where('id', '=', $term['id']);
             }
-        }else {
+        } else {
             $builder->where('id', '=', $user['id']);
         }
 
