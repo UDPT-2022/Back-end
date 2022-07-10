@@ -125,6 +125,11 @@ class UserController extends Controller
         }
         return null;
     }
+    public function DropUser($id)
+    {
+        $user = User::find($id);
+        return User::destroy($id);
+    }
     /**
      * Store a newly created resource in storage.
      *

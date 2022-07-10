@@ -21,6 +21,7 @@ use App\Http\Controllers\StoreController;
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
 Route::get('/existuser/{id}', [UserController::class, 'UserExist']);
+Route::delete('/dropuser/{id}', [UserController::class, 'DropUser']);
 // >> X
 // .....
 

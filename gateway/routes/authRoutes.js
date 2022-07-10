@@ -34,29 +34,81 @@ router.post(
 router.post(
   "/register",
   asyncHandler(async (req, res) => {
-    const body = {
+    const account = {
       name: req.body.name,
       email: req.body.email,
       password: req.body.password,
       password_confirmation: req.body.password_confirmation,
       role: req.body.role,
-      TEN: req.body.TEN,
-      CMND: req.body.CMND,
-      SDT: req.body.SDT,
-      NGAY_SINH: req.body.NGAY_SINH,
-      DIA_CHI: req.body.DIA_CHI,
     };
-    const result = await axios
-      .post(auth + "/register", body, options)
+    let store = {
+      TEN_CUA_HANG: req.body.TEN_CUA_HANG,
+      SDT: req.body.SDT,
+      EMAIL: req.body.EMAIL,
+      DIA_CHI: req.body.DIA_CHI,
+      LOGO: req.body.LOGO,
+      // id: req.body.id,
+    };
+    if (
+      store["TEN_CUA_HANG"] === undefined ||
+      store["TEN_CUA_HANG"] == null ||
+      store["SDT"] === undefined ||
+      store["SDT"] == null ||
+      store["DIA_CHI"] === undefined ||
+      store["DIA_CHI"] == null
+    )
+      return res.status(401).json({ error: "Thiếu thông tin cửa hàng" });
+
+    // console.log(req.get('Authorization'));
+
+    let newAccount = null;
+    let newStore = null;
+    let error = null;
+    await axios
+      .post(auth + "/register", account, options)
       .then((response) => {
-        res.status(200).json(response.data);
-        return;
+        // res.status(200).json(response.data);
+        newAccount = response.data;
       })
       .catch((err) => {
         console.log(err.response);
-        res.status(err.response.status).json(err.response.data);
-        return;
+        error = err.response.data;
       });
+
+    if (error != null) res.status(200).json(error);
+
+    let token = newAccount["token"].split("|")[1];
+    console.log(newAccount["token"]);
+    //console.log(newAccount['id']);
+    //return res.status(200).json(newAccount);
+
+    let op = { ...options };
+    op["headers"]["Authorization"] = "Bearer " + token;
+    store['id'] = newAccount['user']['id'];
+    await axios
+      .post(auth + "/store", store, op)
+      .then((response) => {
+        // res.status(200).json(response.data);
+        newStore = response.data;
+      })
+      .catch((err) => {
+        console.log(err.response);
+        error = err.response.data;
+      });
+    if (error != null) {
+      await axios
+      .delete(auth + "/dropuser/"+newAccount['user']['id'], null, options)
+      .then((response) => {
+
+      })
+      .catch((err) => {
+        console.log(err.response);
+        error = [error,err.response.data];
+      });
+      return res.status(200).json(error);
+    }
+
+    return res.status(200).json({ account, store });
   })
 );
 
