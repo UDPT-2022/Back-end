@@ -45,7 +45,7 @@ class ContractController extends Controller
                 'NGAY_KET_THUC' => 'date|after:NGAY_HIEU_LUC',
                 'GIAY_CHUNG_NHAN_AN_TOAN' => 'string',
                 'GIAY_PHEP_KINH_DOANH' => 'string',
-                'HOP_DONG_DA_XET_DUYET' => 'string',
+                'HOP_DONG_DA_XET_DUYET' => 'boolean',
             ];
         } else {
             $rules = ['NGAY_KY' => 'date|after_or_equal:now'];
@@ -117,11 +117,13 @@ class ContractController extends Controller
     public function show($id = null)
     {
         //
+        $contract = contract::find($id);
+        $contract['TEN_NGUOI_DUNG'] = user::find($contract['id'])['name'];
         $user = auth()->user();
         if (empty($user) || $user == null || $user->role == 'ADMIN') {
-            return contract::find($id);
+            return $contract;
         }
-        $contract = contract::find($id);
+        
         if ($contract['id'] != $user['id'])
             return null;
         return $contract;
@@ -138,26 +140,26 @@ class ContractController extends Controller
     {
         //
         // current user
-        
+
         $user = auth()->user();
-        
+
         // rules
         $rules = null;
         if (empty($user) || $user == null) {
             $rules = [
                 'NGAY_KY' => 'date|after_or_equal:now',
-                'id' => 'required|numeric',
+                // 'id' => 'required|numeric',
                 'NGAY_HIEU_LUC' => 'date|after_or_equal:NGAY_KY',
                 'NGAY_KET_THUC' => 'date|after:NGAY_HIEU_LUC',
                 'GIAY_CHUNG_NHAN_AN_TOAN' => 'string',
                 'GIAY_PHEP_KINH_DOANH' => 'string',
-                'HOP_DONG_DA_XET_DUYET' => 'string',
+                'HOP_DONG_DA_XET_DUYET' => 'boolean',
             ];
         } else {
             $rules = ['NGAY_KY' => 'date|after_or_equal:now'];
             switch ($user->role) {
                 case 'ADMIN':
-                    $rules['id'] = 'required|numeric';
+                    //$rules['id'] = 'required|numeric';
                     // $rules['NGAY_KY'] = 'date';
                     $rules['NGAY_HIEU_LUC'] = 'date|after_or_equal:NGAY_KY';
                     $rules['NGAY_KET_THUC'] = 'date|after:NGAY_HIEU_LUC';
@@ -188,13 +190,19 @@ class ContractController extends Controller
             $fields['NGAY_HIEU_LUC'] =  date("Y-m-d", strtotime($fields['NGAY_HIEU_LUC']));
         if (!empty($fields['NGAY_KET_THUC']) && $fields['NGAY_KET_THUC'] != null)
             $fields['NGAY_KET_THUC'] =  date("Y-m-d", strtotime($fields['NGAY_KET_THUC']));
-        if (!empty($fields['HOP_DONG_DA_XET_DUYET']) && $fields['HOP_DONG_DA_XET_DUYET'] == true && empty($fields['NGAY_KY']) && empty($fields['NGAY_HIEU_LUC']) && empty($fields['NGAY_KET_THUC'])) {
+        if (!empty($fields['HOP_DONG_DA_XET_DUYET']) && $fields['HOP_DONG_DA_XET_DUYET'] == true) {
             //$fields['NGAY_KET_THUC'] =  date("Y-m-d", strtotime($fields['NGAY_KET_THUC']));
-            $start = date('Y-m-d');
-            $fields['NGAY_KY'] = $start;
-            $fields['NGAY_HIEU_LUC'] = date("Y-m-d", strtotime($start . "+ 7 days"));
-            $fields['NGAY_KET_THUC'] = date("Y-m-d", strtotime($fields['NGAY_HIEU_LUC'] . "+ 5 years"));
+            if (empty($fields['NGAY_KY']) && empty($fields['NGAY_HIEU_LUC']) && empty($fields['NGAY_KET_THUC'])) {
+                $start = date('Y-m-d');
+                $fields['NGAY_KY'] = $start;
+                $fields['NGAY_HIEU_LUC'] = date("Y-m-d", strtotime($start . "+ 7 days"));
+                $fields['NGAY_KET_THUC'] = date("Y-m-d", strtotime($fields['NGAY_HIEU_LUC'] . "+ 5 years"));
+            }
+        } else {
+            $fields['NGAY_HIEU_LUC'] = null;
+            $fields['NGAY_KET_THUC'] = null;
         }
+
 
 
         if (!empty($user) && $user != null && $user['role'] != 'ADMIN' && $user['id'] != $contract['id']) {

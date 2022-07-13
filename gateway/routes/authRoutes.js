@@ -76,15 +76,17 @@ router.post(
       });
 
     if (error != null) res.status(200).json(error);
-
+    if (newAccount["role"] != "SELLER") return res.status(200).json({ account });
+    
     let token = newAccount["token"].split("|")[1];
     //console.log(newAccount["token"]);
     //console.log(newAccount['id']);
     //return res.status(200).json(newAccount);
 
     let op = { ...options };
+    
     op["headers"]["Authorization"] = "Bearer " + token;
-    store['id'] = newAccount['user']['id'];
+    store["id"] = newAccount["user"]["id"];
     await axios
       .post(auth + "/store", store, op)
       .then((response) => {
@@ -97,14 +99,12 @@ router.post(
       });
     if (error != null) {
       await axios
-      .delete(auth + "/dropuser/"+newAccount['user']['id'], null, options)
-      .then((response) => {
-
-      })
-      .catch((err) => {
-        console.log(err.response);
-        error = [error,err.response.data];
-      });
+        .delete(auth + "/dropuser/" + newAccount["user"]["id"], null, options)
+        .then((response) => {})
+        .catch((err) => {
+          console.log(err.response);
+          error = [error, err.response.data];
+        });
       return res.status(200).json(error);
     }
 

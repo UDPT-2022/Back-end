@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\profile;
+use App\Models\Contract;
+use DateTime;
 use Error;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 
 class UserController extends Controller
 {
@@ -94,9 +97,24 @@ class UserController extends Controller
 
         $token = $user->createToken('myapptoken')->plainTextToken;
 
+        // check contract
+        $builder = Contract::query();
+        $builder->where('id', '=', $user['id']);
+        $builder->where('HOP_DONG_DA_XET_DUYET', '=', 1);
+        $now = (new DateTime())->format('Y-m-d');
+        $builder->where('NGAY_HIEU_LUC', '>=', $now);
+        $builder->where('NGAY_KET_THUC', '>=', $now);
+        $contract = $builder->first();
+        $has_contract = null;
+        // if (count($contract) < 0)
+        if (empty($contract) || $contract == null)
+            $has_contract = false;
+        else
+            $has_contract = true;
         $response = [
             'user' => $user,
-            'token' => $token
+            'token' => $token,
+            'has_contract' =>   $has_contract,
         ];
 
         return response($response, 201);

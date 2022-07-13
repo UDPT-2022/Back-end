@@ -102,9 +102,16 @@ class OrderController extends Controller
             if ($order['MA_NGUOI_DUNG'] != $CurUser['id'] && $order['MA_CUA_HANG'] != $CurUser['id'])
                 throw new Error('không có quyền');
         }
+        if (empty($order) || $order == null)
+            return [];
+        $details = order_detail::where('MA_DON_HANG', '=', $id)->get();
+        foreach ($details as $index => $val) {
+            $product= product::find($val['MA_SP']);
+            $details[$index]['TEN_SP'] = $product['TEN_SP'];
+            $details[$index]['ANH'] = $product['ANH'];
+        }
 
-        $detail = order_detail::where('MA_DON_HANG', '=', $id)->get();
-        $order['CHI_TIET_DON_HANG'] =  $detail;
+        $order['CHI_TIET_DON_HANG'] =  $details;
         return $order;
     }
 
@@ -348,9 +355,8 @@ class OrderController extends Controller
             $detail = order_detail::where('MA_DON_HANG', '=', $order['MA_DON_HANG'])->get();
             if (!empty($detail) && $detail != null) {
                 $order['CHI_TIET_DON_HANG'] =  $detail;
-            }
-            else
-            $order['CHI_TIET_DON_HANG'] = [];
+            } else
+                $order['CHI_TIET_DON_HANG'] = [];
         }
         return $orders;
     }
@@ -432,8 +438,8 @@ class OrderController extends Controller
                 'GHI_CHU' => 'string|nullable',
             ]);
             $orderInfo['MA_NGUOI_DUNG'] = $fields['MA_NGUOI_DUNG'];
-            $orderInfo['MA_CUA_HANG'] =$store;
-            $orderInfo['TRANG_THAI'] =$fields['TRANG_THAI'];
+            $orderInfo['MA_CUA_HANG'] = $store;
+            $orderInfo['TRANG_THAI'] = $fields['TRANG_THAI'];
             // $orderInfo = [
             //     'MA_NGUOI_DUNG' => $fields['MA_NGUOI_DUNG'],
             //     'MA_CUA_HANG' => $store,
