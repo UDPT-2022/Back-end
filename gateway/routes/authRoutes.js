@@ -76,7 +76,7 @@ router.post(
       });
 
     if (error != null) res.status(200).json(error);
-    if (newAccount["role"] != "SELLER") return res.status(200).json({ account });
+    if (newAccount['user']["role"] !== "SELLER") return res.status(200).json({ account });
     
     let token = newAccount["token"].split("|")[1];
     //console.log(newAccount["token"]);

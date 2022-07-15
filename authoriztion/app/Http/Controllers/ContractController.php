@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Contract;
 use App\Models\User;
 use App\Models\profile;
+use DateTime;
 use Error;
 
 class ContractController extends Controller
@@ -121,11 +122,18 @@ class ContractController extends Controller
         $contract['TEN_NGUOI_DUNG'] = user::find($contract['id'])['name'];
         $user = auth()->user();
         if (empty($user) || $user == null || $user->role == 'ADMIN') {
+            $response = [
+                'contract' => $contract,
+                'date' => new DateTime()
+            ];
+
+            return response($response, 201);
             return $contract;
         }
-        
+
         if ($contract['id'] != $user['id'])
             return null;
+
         return $contract;
     }
 
