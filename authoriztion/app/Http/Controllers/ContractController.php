@@ -20,10 +20,11 @@ class ContractController extends Controller
     {
         //
         $user = auth()->user();
-        if ($user->role == 'ADMIN') {
+        if (empty($user) || $user == null || $user['role'] == 'ADMIN') {
             return contract::orderBy('created_at', 'desc')->orderBy('updated_at', 'desc')->get();
-        }
-        return  contract::where('id', '=', $user->id)->orderBy('created_at', 'desc')->orderBy('updated_at', 'desc')->get();
+        } 
+        return contract::where('id', '=', $user->id)->orderBy('created_at', 'desc')->orderBy('updated_at', 'desc')->get();
+        
     }
 
     /**
@@ -50,7 +51,7 @@ class ContractController extends Controller
             ];
         } else {
             $rules = ['NGAY_KY' => 'date|after_or_equal:now'];
-            switch ($user->role) {
+            switch ($user['role']) {
                 case 'ADMIN':
                     $rules['id'] = 'required|numeric';
                     // $rules['NGAY_KY'] = 'date';
@@ -272,7 +273,9 @@ class ContractController extends Controller
         } else {
             $builder->where('id', '=', $user['id']);
         }
-
+        if (!empty($term['HOP_DONG_DA_XET_DUYET'])) {
+            $builder->where('HOP_DONG_DA_XET_DUYET', '=', $term['HOP_DONG_DA_XET_DUYET']);
+        }
         return $builder->get();
     }
 }
