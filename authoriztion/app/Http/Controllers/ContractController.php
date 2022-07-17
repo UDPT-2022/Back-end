@@ -254,6 +254,7 @@ class ContractController extends Controller
         $user = auth()->user();
         $builder = Contract::query();
         $term = $request->all();
+
         if (!empty($term['LOAI'])) {
             $builder->where('LOAI', 'like', $term['LOAI']);
         }
@@ -273,9 +274,10 @@ class ContractController extends Controller
         } else {
             $builder->where('id', '=', $user['id']);
         }
-        if (!empty($term['HOP_DONG_DA_XET_DUYET'])) {
+        if (!empty($term['HOP_DONG_DA_XET_DUYET']) || $term['HOP_DONG_DA_XET_DUYET'] == 0) {
             $builder->where('HOP_DONG_DA_XET_DUYET', '=', $term['HOP_DONG_DA_XET_DUYET']);
         }
+    
         return $builder->get();
     }
 }

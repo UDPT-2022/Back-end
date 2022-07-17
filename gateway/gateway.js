@@ -10,6 +10,6 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use('/api',require('./routes/authRoutes'));
 app.use('/api/contract',require('./routes/contractRoutes'));
-// app.use('/api/order',require('./routes/orderRoutes'));
+app.use('/api/order',require('./routes/orderRoutes'));
 
 app.listen(port, ()=> console.log(`Run on Port: ${port}`))

@@ -155,3 +155,4 @@ router.put(
       return res.json(result);
     })
   );
+  module.exports = router;

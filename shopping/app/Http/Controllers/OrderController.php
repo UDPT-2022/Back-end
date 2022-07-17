@@ -106,7 +106,7 @@ class OrderController extends Controller
             return [];
         $details = order_detail::where('MA_DON_HANG', '=', $id)->get();
         foreach ($details as $index => $val) {
-            $product= product::find($val['MA_SP']);
+            $product = product::find($val['MA_SP']);
             $details[$index]['TEN_SP'] = $product['TEN_SP'];
             $details[$index]['ANH'] = $product['ANH'];
         }
@@ -204,20 +204,23 @@ class OrderController extends Controller
             }
         }
         if ($CurUser == null) {
-            $store = Http::withHeaders([
-                'accept' => 'application/json',
-            ])->get('http://localhost:8002/api/store/' . $fields['MA_CUA_HANG'])->json();
-            if (empty($store) || $store == null)
-                throw new Error('store không tồn tại');
-
-            $buyer = Http::withHeaders([
-                'accept' => 'application/json',
-            ])->get('http://localhost:8002/api/existuser/' . $fields['MA_NGUOI_DUNG'])->json();
-            if (empty($buyer) || $buyer == null)
-                throw new Error('buyer{MA_NGUOI_DUNG} không tồn tại');
-            else {
-                if ($buyer['role'] != 'BUYER')
-                    throw new Error('không phải buyer');
+            if (!empty($fields['MA_CUA_HANG'])) {
+                $store = Http::withHeaders([
+                    'accept' => 'application/json',
+                ])->get('http://localhost:8002/api/store/' . $fields['MA_CUA_HANG'])->json();
+                if (empty($store) || $store == null)
+                    throw new Error('store không tồn tại');
+            }
+            if (!empty($fields['MA_NGUOI_DUNG'])) {
+                $buyer = Http::withHeaders([
+                    'accept' => 'application/json',
+                ])->get('http://localhost:8002/api/existuser/' . $fields['MA_NGUOI_DUNG'])->json();
+                if (empty($buyer) || $buyer == null)
+                    throw new Error('buyer{MA_NGUOI_DUNG} không tồn tại');
+                else {
+                    if ($buyer['role'] != 'BUYER')
+                        throw new Error('không phải buyer');
+                }
             }
         } else {
             if ($CurUser['role'] == 'SHIPPER' && array_key_exists('SHIPPER_ACTION', $fields)) {
